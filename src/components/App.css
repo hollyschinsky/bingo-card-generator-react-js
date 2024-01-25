@@ -1,14 +1,24 @@
 sp-theme {
     display: grid;
+    /* margin: 0 var(--spectrum-global-dimension-size-200);
+    display: flex;
+    flex-direction: column; */
 }
+
+/* .container {
+    margin: 24px;
+    display: flex;
+    flex-direction: column;
+    
+} */
 
 h2 {
     font-weight: var(--spectrum-global-font-weight-black);
 }
 
-sp-swatch {
+/* sp-swatch {
     width: var(--spectrum-swatch-size-medium);                
-}
+} */
 
 sp-button {
     flex: 1;
@@ -35,7 +45,7 @@ sp-button-group {
 }
 
 sp-slider {
-    width: 250px;
+    width: --spectrum-global-dimension-static-size-3200;
     --spectrum-slider-font-size: var(--spectrum-font-size-100);    
 } 
 
@@ -43,10 +53,15 @@ sp-field-label {
    font-size: var(--spectrum-global-dimension-font-size-100);   
 }
 
+input {
+    display: none;
+}
+
 .color-well {
     cursor: pointer;
     --mod-swatch-border-thickness: var(--spectrum-divider-thickness-small);
     --mod-swatch-border-color: var(--spectrum-transparent-black-500);
+    
 }
 
 .row {

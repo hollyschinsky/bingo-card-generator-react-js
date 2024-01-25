@@ -36,24 +36,24 @@ const App = ({ addOnUISdk }) => {
     const [gridColorSwatch, setGridColorSwatch] = useState("#5258e5");
 
     const [fontWeightPicker, setFontWeightPicker] = useState("normal");
-    const [freeSpaceToggle, setFreeSpaceToggle] = useState(false);
-    const [gridlineSize, setGridlineSize] = useState(5);    
+    const [freeSpaceToggle, setFreeSpaceToggle] = useState(true);
+    const [gridlineSize, setGridlineSize] = useState(5);
+    const [addToPageEnabled, setAddToPageEnabled] = useState(false);
     
     // Refs to the UI elements for colors, add button and HTML canvas
     const fgColorInput = useRef(null);
     const bgColorInput = useRef(null);
     const gridColorInput = useRef(null);
     const titleColorInput = useRef(null);
-    const addBtn = useRef(null);    
-    const finalCardCanvas = useRef(null);
+    const cardCanvas = useRef(null);
 
     // Function to generate the bingo card using an HTML canvas and drawing context 
     function generateBingoCard() {              
-        const ctx = finalCardCanvas.current.getContext("2d");
+        const ctx = cardCanvas.current.getContext("2d");
 
         // Set canvas width and height
-        finalCardCanvas.current.width = 300;
-        finalCardCanvas.current.height = 360;
+        cardCanvas.current.width = 300;
+        cardCanvas.current.height = 360;
         
         // Set grid properties            
         const numRows = 6;
@@ -63,34 +63,46 @@ const App = ({ addOnUISdk }) => {
                         
         // Fill background boxes with selected bg color
         ctx.fillStyle = bgColor; 
-        for (let x = gridlineSize/2; x <= finalCardCanvas.current.width; x +=   cellWidth-gridlineSize) {            
-            for (let y = gridlineSize/2; y <= finalCardCanvas.current.height; y += cellHeight-gridlineSize) {
-                ctx.fillRect(x, y, cellWidth-gridlineSize, cellHeight-gridlineSize);
+        for (let x = gridlineSize/2; x <= cardCanvas.current.width; x += cellWidth-gridlineSize) {            
+            for (let y = gridlineSize/2; y <= cardCanvas.current.height; y += cellHeight-gridlineSize) {
+                ctx.fillRect(x, y, cellWidth, cellHeight);
             }
         }                        
         
+        
         // Draw gridlines
         ctx.lineWidth = gridlineSize; 
+        let x=0;
+        let y=0;
         for (let i = 0; i <= numCols; i++) {        
             // Need to adjust for left/right gridlines size
-            ctx.moveTo(gridlineSize/2, 0);
-            ctx.lineTo(gridlineSize/2, finalCardCanvas.current.height);      
-
-            ctx.moveTo(i * cellWidth-gridlineSize/2, 0);
-            ctx.lineTo(i * cellWidth-gridlineSize/2, finalCardCanvas.current.height);            
+            if (i===0) {
+                console.log("line to " + gridlineSize/2 + " " + cardCanvas.current.height)
+                // ctx.moveTo(gridlineSize/2, 0);
+                // ctx.lineTo(gridlineSize/2, cardCanvas.current.height);
+                ctx.moveTo(gridlineSize/2, 0);
+                ctx.lineTo(gridlineSize/2, cardCanvas.current.height);
+            }
+            else {
+                ctx.moveTo(i * cellWidth-gridlineSize/2, 0);
+                ctx.lineTo(i * cellWidth-gridlineSize/2, cardCanvas.current.height);
+                
+            }
         }
-
+        
         for (let i = 0; i <= numRows; i++) { 
             // Need to adjust for top/bottom gridlines size               
-            ctx.moveTo(0, gridlineSize/2);
-            ctx.lineTo(finalCardCanvas.current.height, gridlineSize/2,);            
-        
-            ctx.moveTo(0, i * cellWidth-gridlineSize/2);
-            ctx.lineTo(finalCardCanvas.current.height, i * cellWidth-gridlineSize/2);                    
+            if (i===0) {
+                ctx.moveTo(0, gridlineSize/2);
+                ctx.lineTo(cardCanvas.current.height, gridlineSize/2,);
+            }
+            else {
+                ctx.moveTo(0, i * cellWidth-gridlineSize/2);
+                ctx.lineTo(cardCanvas.current.height, i * cellWidth-gridlineSize/2);                    
+            }                    
         }
-                
         ctx.strokeStyle = gridColor; // Gridlines color
-        ctx.stroke();
+        ctx.stroke();                        
                             
         // Draw bingo title
         ctx.font = fontWeightPicker +' 28px adobe clean';    
@@ -109,13 +121,12 @@ const App = ({ addOnUISdk }) => {
         const numbers = [];
         const usedNumbers = new Set(); // Track used numbers
         ctx.font = fontWeightPicker +' 22px adobe clean';
-        ctx.fillStyle = fgColor; // color of the foreground (numbers)         
-        const freeSpaceToggle = document.getElementById("freeSpaceToggle");
-        
+        ctx.fillStyle = fgColor; // color of the foreground (numbers)                 
+                
         for (let i = 1; i < numRows; i++) {
             numbers[i] = [];
             for (let j = 0; j < numCols; j++) {
-                if (freeSpaceToggle.checked) {
+                if (freeSpaceToggle) {
                     if (i === freeSpace[0] && j === freeSpace[1]) {
                         numbers[i][j] = "FREE";
                         continue; // Skip the FREE space
@@ -134,31 +145,23 @@ const App = ({ addOnUISdk }) => {
         }
                 
         // Draw "FREE" if the toggle is checked
-        if (freeSpaceToggle.checked) {
+        if (freeSpaceToggle) {
             ctx.font = fontWeightPicker +' 20px adobe clean';     
-            ctx.fillText("FREE", freeSpace[1] * cellWidth + cellWidth / 2 - 3, freeSpace[0] * cellHeight + cellHeight / 2 + 3);   
-            ctx.drawImage(canvas, 0, 0);
+            ctx.fillText("FREE", freeSpace[1] * cellWidth + cellWidth / 2 - 3, freeSpace[0] * cellHeight + cellHeight / 2 + 3);            
         }    
             
         // Enable drag and drop for the card
-        addOnUISdk.app.enableDragToDocument(finalCardCanvas.current, {
-            previewCallback: el => new URL(finalCardCanvas.current.toDataURL()),
+        addOnUISdk.app.enableDragToDocument(cardCanvas.current, {
+            previewCallback: el => new URL(cardCanvas.current.toDataURL()),
             completionCallback: async el => {
-                const r = await fetch(finalCardCanvas.current.toDataURL());
+                const r = await fetch(cardCanvas.current.toDataURL());
                 const blob = await r.blob();
                 return [{blob}];
             }
-        })
-        
-        // Add button click handler
-        addBtn.current.onclick = async () => {      
-            const r = await fetch(finalCardCanvas.current.toDataURL());
-            const blob = await r.blob();    
-            addOnUISdk.app.document.addImage(blob);  
-        }
+        })        
 
         // Enable add card button
-        addBtn.current.disabled = false;                      
+        setAddToPageEnabled(true);        
     }
     
     // Trigger click on the native color picker input for each
@@ -197,45 +200,53 @@ const App = ({ addOnUISdk }) => {
     function onGridColorChange(e) {        
         setGridColorSwatch(e.target.value);
         setGridColor(e.target.value);        
-    }    
+    }
+    
+    async function handleAddToPage() {        
+        const blob = await new Promise((resolve, reject) => {
+            cardCanvas.current.toBlob(blob => { resolve(blob); })
+        })
+        addOnUISdk.app.document.addImage(blob);            
+    }
 
     return (
         // Please note that the below "<Theme>" component does not react to theme changes in Express.
         // You may use "addOnUISdk.app.ui.theme" to get the current theme and react accordingly.
-        <Theme theme="express" scale="medium" color="light">        
-            <div className="row gap-20"> 
+        <Theme theme="express" scale="medium" color="light">
+            <div className="container">
+            <div className="row gap-20">             
                 <div className="column">
-                    <FieldLabel for="bgColorSwatch" size="m">Background color</FieldLabel>
+                    <FieldLabel size="l">Background color</FieldLabel>
                     <WC onChange={onBgColorClick}>
-                        <Swatch id="bgColorSwatch" className="color-well" color={bgColorSwatch}></Swatch>
+                        <Swatch className="color-well" color={bgColorSwatch}></Swatch>
                     </WC>
-                    <input ref={bgColorInput} type="color" id="bgColorPicker" style={{display: "none"}}
+                    <input ref={bgColorInput} type="color" style={{display: "none"}}
                         value={bgColor} onChange={onBgColorChange}
                     />
                 </div>
                 <div className="column">
-                    <FieldLabel for="fgColorSwatch" size="m">Number color</FieldLabel>
+                    <FieldLabel size="l">Number color</FieldLabel>
                     <WC onChange={onFgColorClick}>
-                        <Swatch id="fgColorSwatch" className="color-well" color={fgColorSwatch}></Swatch>
+                        <Swatch className="color-well" color={fgColorSwatch}></Swatch>
                     </WC>
-                    <input ref={fgColorInput} type="color" id="fgColorPicker" style={{display: "none"}}
+                    <input ref={fgColorInput} type="color" style={{display: "none"}}
                         value={fgColor} onChange={onFgColorChange}
                     />                        
                 </div>                                                       
                 <div className="column">
-                    <FieldLabel for="titleColorSwatch" size="m">Title color</FieldLabel>
+                    <FieldLabel size="l">Title color</FieldLabel>
                     <WC onChange={onTitleColorClick}>
-                        <Swatch id="titleColorSwatch" className="color-well" color={titleColorSwatch}></Swatch>
+                        <Swatch className="color-well" color={titleColorSwatch}></Swatch>
                     </WC>
-                    <input ref={titleColorInput} type="color" id="titleColorPicker" style={{display: "none"}}
+                    <input ref={titleColorInput} type="color" style={{display: "none"}}
                         value ={titleColor} onChange={onTitleColorChange}
                     />                    
                 </div>                                
             </div>
             <div className="row gap-20">
                 <div className="column margin-top-10">
-                    <FieldLabel for="fontWeightPicker">Font Weight</FieldLabel>
-                    <Picker id="fontWeightPicker" size="m" value={fontWeightPicker} 
+                    <FieldLabel size="l">Font Weight</FieldLabel>
+                    <Picker size="m" value={fontWeightPicker} 
                         change={event => setFontWeightPicker(event.target.value)}>
                         <MenuItem value="normal">Normal</MenuItem>                        
                         <MenuItem value="bold">Bold</MenuItem>                            
@@ -244,36 +255,37 @@ const App = ({ addOnUISdk }) => {
                 </div>  
                 <div className="column">
                     <WC onChange={event => setFreeSpaceToggle(event.target.checked)}>
-                        <Switch id="freeSpaceToggle" emphasized value={freeSpaceToggle} size="l">Free space</Switch>
+                        <Switch emphasized checked={freeSpaceToggle} size="l">Free space</Switch>
                     </WC>
                 </div>         
             </div>
             <div className="row gap-20">                                
                 <WC onChange={event => setGridlineSize(event.target.value)}>
-                    <Slider label="Gridlines size" id="gridlineSize" variant="filled" editable value={gridlineSize}
+                    <Slider label="Gridlines size" variant="filled" editable value={gridlineSize}
                         hide-stepper min="1" max="10"
                         format-options='{"style": "unit", "unit": "px"}' step="1">
                     </Slider>
                 </WC>                                 
                 <div className="column">
-                    <FieldLabel for="gridColorSwatch" size="m">Color</FieldLabel>
+                    <FieldLabel size="l">Color</FieldLabel>
                     <WC onChange={onGridColorClick}>
-                        <Swatch id="gridColorSwatch" className="color-well" color={gridColorSwatch}></Swatch>
+                        <Swatch className="color-well" color={gridColorSwatch}></Swatch>
                     </WC>
-                    <input ref={gridColorInput} type="color" id="gridColorPicker" style={{display: "none"}}
+                    <input ref={gridColorInput} type="color" style={{display: "none"}}
                         value={gridColor} onChange={onGridColorChange}
                     />
                 </div>                    
             </div>                 
             <div>
                 <ButtonGroup horizontal>
-                    <Button id="generateBtn" onClick={event => generateBingoCard(event.target.value)}>Generate card</Button>
-                    <Button id="addBtn" ref={addBtn} variant="secondary" disabled>Add to page</Button>
+                    <Button onClick={generateBingoCard}>Generate card</Button>
+                    <Button onClick={handleAddToPage} disabled={!addToPageEnabled} variant="secondary">Add to page</Button>
                 </ButtonGroup>              
             </div>                
             <div className="margin-top-10">                        
-                <canvas id="finalCardCanvas" ref={finalCardCanvas}/>            
-            </div>                                         
+                <canvas ref={cardCanvas}/>            
+            </div> 
+        </div>                                        
         </Theme>
     );
 };
