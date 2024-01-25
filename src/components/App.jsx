@@ -77,9 +77,6 @@ const App = ({ addOnUISdk }) => {
         for (let i = 0; i <= numCols; i++) {        
             // Need to adjust for left/right gridlines size
             if (i===0) {
-                console.log("line to " + gridlineSize/2 + " " + bingoCanvas.current.height)
-                // ctx.moveTo(gridlineSize/2, 0);
-                // ctx.lineTo(gridlineSize/2, bingoCanvas.current.height);
                 ctx.moveTo(gridlineSize/2, 0);
                 ctx.lineTo(gridlineSize/2, bingoCanvas.current.height);
             }
