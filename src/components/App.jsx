@@ -45,15 +45,15 @@ const App = ({ addOnUISdk }) => {
     const bgColorInput = useRef(null);
     const gridColorInput = useRef(null);
     const titleColorInput = useRef(null);
-    const cardCanvas = useRef(null);
+    const bingoCanvas = useRef(null);
 
     // Function to generate the bingo card using an HTML canvas and drawing context 
     function generateBingoCard() {              
-        const ctx = cardCanvas.current.getContext("2d");
+        const ctx = bingoCanvas.current.getContext("2d");
 
         // Set canvas width and height
-        cardCanvas.current.width = 300;
-        cardCanvas.current.height = 360;
+        bingoCanvas.current.width = 300;
+        bingoCanvas.current.height = 360;
         
         // Set grid properties            
         const numRows = 6;
@@ -63,8 +63,8 @@ const App = ({ addOnUISdk }) => {
                         
         // Fill background boxes with selected bg color
         ctx.fillStyle = bgColor; 
-        for (let x = gridlineSize/2; x <= cardCanvas.current.width; x += cellWidth-gridlineSize) {            
-            for (let y = gridlineSize/2; y <= cardCanvas.current.height; y += cellHeight-gridlineSize) {
+        for (let x = gridlineSize/2; x <= bingoCanvas.current.width; x += cellWidth-gridlineSize) {            
+            for (let y = gridlineSize/2; y <= bingoCanvas.current.height; y += cellHeight-gridlineSize) {
                 ctx.fillRect(x, y, cellWidth, cellHeight);
             }
         }                        
@@ -77,15 +77,15 @@ const App = ({ addOnUISdk }) => {
         for (let i = 0; i <= numCols; i++) {        
             // Need to adjust for left/right gridlines size
             if (i===0) {
-                console.log("line to " + gridlineSize/2 + " " + cardCanvas.current.height)
+                console.log("line to " + gridlineSize/2 + " " + bingoCanvas.current.height)
                 // ctx.moveTo(gridlineSize/2, 0);
-                // ctx.lineTo(gridlineSize/2, cardCanvas.current.height);
+                // ctx.lineTo(gridlineSize/2, bingoCanvas.current.height);
                 ctx.moveTo(gridlineSize/2, 0);
-                ctx.lineTo(gridlineSize/2, cardCanvas.current.height);
+                ctx.lineTo(gridlineSize/2, bingoCanvas.current.height);
             }
             else {
                 ctx.moveTo(i * cellWidth-gridlineSize/2, 0);
-                ctx.lineTo(i * cellWidth-gridlineSize/2, cardCanvas.current.height);
+                ctx.lineTo(i * cellWidth-gridlineSize/2, bingoCanvas.current.height);
                 
             }
         }
@@ -94,11 +94,11 @@ const App = ({ addOnUISdk }) => {
             // Need to adjust for top/bottom gridlines size               
             if (i===0) {
                 ctx.moveTo(0, gridlineSize/2);
-                ctx.lineTo(cardCanvas.current.height, gridlineSize/2,);
+                ctx.lineTo(bingoCanvas.current.height, gridlineSize/2,);
             }
             else {
                 ctx.moveTo(0, i * cellWidth-gridlineSize/2);
-                ctx.lineTo(cardCanvas.current.height, i * cellWidth-gridlineSize/2);                    
+                ctx.lineTo(bingoCanvas.current.height, i * cellWidth-gridlineSize/2);                    
             }                    
         }
         ctx.strokeStyle = gridColor; // Gridlines color
@@ -151,10 +151,10 @@ const App = ({ addOnUISdk }) => {
         }    
             
         // Enable drag and drop for the card
-        addOnUISdk.app.enableDragToDocument(cardCanvas.current, {
-            previewCallback: el => new URL(cardCanvas.current.toDataURL()),
+        addOnUISdk.app.enableDragToDocument(bingoCanvas.current, {
+            previewCallback: el => new URL(bingoCanvas.current.toDataURL()),
             completionCallback: async el => {
-                const r = await fetch(cardCanvas.current.toDataURL());
+                const r = await fetch(bingoCanvas.current.toDataURL());
                 const blob = await r.blob();
                 return [{blob}];
             }
@@ -204,7 +204,7 @@ const App = ({ addOnUISdk }) => {
     
     async function handleAddToPage() {        
         const blob = await new Promise((resolve, reject) => {
-            cardCanvas.current.toBlob(blob => { resolve(blob); })
+            bingoCanvas.current.toBlob(blob => { resolve(blob); })
         })
         addOnUISdk.app.document.addImage(blob);            
     }
@@ -283,7 +283,7 @@ const App = ({ addOnUISdk }) => {
                 </ButtonGroup>              
             </div>                
             <div className="margin-top-10">                        
-                <canvas ref={cardCanvas}/>            
+                <canvas ref={bingoCanvas}/>            
             </div> 
         </div>                                        
         </Theme>
