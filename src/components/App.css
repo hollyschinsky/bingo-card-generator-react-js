@@ -2,8 +2,9 @@ sp-theme {
     display: grid;        
 }
 
-h2 {
-    font-weight: var(--spectrum-global-font-weight-black);
+h3 {
+    font-weight: var(--spectrum-global-font-weight-thin);
+    /* font-weight: var(--spectrum-global-font-weight-black); */
 }
 
 sp-swatch {
