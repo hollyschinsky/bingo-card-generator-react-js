@@ -64,11 +64,11 @@ sp-field-label {
 }
 
 .gap-20 {
-    gap: var(--spectrum-global-dimension-static-size-250); 
+    gap: var(--spectrum-global-dimension-static-size-250); /* 20px */
 }
 
 .margin-top-10 {
-    margin-top: var(--spectrum-global-dimension-static-size-125); 
+    margin-top: var(--spectrum-global-dimension-static-size-125); /* 10px */
 }
 
 #bingoCanvas {
