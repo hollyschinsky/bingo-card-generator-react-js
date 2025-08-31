@@ -207,7 +207,7 @@ const App = ({ addOnUISdk }) => {
     return (
         // Please note that the below "<Theme>" component does not react to theme changes in Express.
         // You may use "addOnUISdk.app.ui.theme" to get the current theme and react accordingly.        
-        <Theme theme="express" scale="medium" color="light">
+        <Theme system="express" scale="medium" color="light">
             {/* <h3>Customize a bingo card</h3> */}
             <div className="container">
             <div className="row gap-20">             
